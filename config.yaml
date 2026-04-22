@@ -1,0 +1,9 @@
+model:
+  provider: claude
+  model_name: claude-sonnet-4-6
+paths:
+  strategies_dir: strategies
+  datasets_dir: datasets
+thresholds:
+  min_samples: 100
+  canary_ratio: 0.1
