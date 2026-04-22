@@ -15,9 +15,38 @@ dependencies = [
 dev = [
   "pytest>=8.3.0",
   "pytest-cov>=6.0.0",
+  "mypy>=1.8.0",
+  "ruff>=0.3.0",
+  "pre-commit>=3.6.0",
+  "bandit[toml]>=1.7.0",
+  "safety>=3.0.0",
 ]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-addopts = "-q"
+addopts = "-v --strict-markers"
 testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*", "**/__init__.py"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+skips = ["B101"]
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
