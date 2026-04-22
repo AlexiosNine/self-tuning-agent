@@ -16,4 +16,4 @@ class HarnessOrchestrator:
         current_version = (self.version_manager.strategies_dir / "current").resolve().name
         current_number = int(current_version.removeprefix("v"))
         new_version = f"v{current_number + 1:03d}"
-        return self.optimizer.create_mutation(current_version, new_version)
+        return self.optimizer.create_mutation(current_version, new_version, records)

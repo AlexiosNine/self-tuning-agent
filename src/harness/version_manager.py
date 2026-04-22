@@ -10,6 +10,7 @@ from pydantic import ValidationError
 
 from src.common.exceptions import (
     FileOperationError,
+    InvalidVersionStateError,
     VersionAlreadyExistsError,
     VersionNotFoundError,
 )
@@ -130,6 +131,48 @@ class VersionManager:
         except OSError as e:
             logger.error(f"Failed to update metadata: {e}")
             raise FileOperationError(f"Metadata update failed: {e}") from e
+
+    def rollback(self, version_id: str) -> str:
+        """Rollback a production version to its parent.
+
+        Args:
+            version_id: Version to rollback (must be PRODUCTION)
+
+        Returns:
+            Parent version ID that was promoted
+
+        Raises:
+            VersionNotFoundError: If version does not exist
+            InvalidVersionStateError: If version is not PRODUCTION or has no parent
+        """
+        logger.info("Rolling back version %s", version_id)
+
+        version = self.load_version(version_id)
+
+        if version.status != StrategyStatus.PRODUCTION:
+            raise InvalidVersionStateError(
+                f"Cannot rollback {version_id}: status is {version.status}, expected production"
+            )
+
+        if not version.parent_version:
+            raise InvalidVersionStateError(f"Cannot rollback {version_id}: no parent version")
+
+        parent_id = version.parent_version
+
+        # Promote parent back to production (uses atomic symlink)
+        self.promote_to_production(parent_id)
+
+        # Mark rolled-back version
+        rolled_back = version.model_copy(update={"status": StrategyStatus.ROLLBACK})
+        version_dir = self.strategies_dir / version_id
+        try:
+            (version_dir / "metadata.json").write_text(rolled_back.model_dump_json(indent=2))
+        except OSError as e:
+            logger.error("Failed to update rollback status for %s: %s", version_id, e)
+            raise FileOperationError(f"Metadata update failed for {version_id}") from e
+
+        logger.info("Rolled back %s to %s", version_id, parent_id)
+        return parent_id
 
     def create_version(self, version_id: str, parent_version: str | None, prompt_config: dict[str, Any]) -> None:
         """Create a new version with configuration files.
