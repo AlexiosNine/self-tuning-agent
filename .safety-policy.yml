@@ -1,0 +1,6 @@
+version: "3.0"
+scan:
+  ignore:
+    vulnerabilities:
+      - id: "85681"
+        reason: "CVE-2026-1703 in pip - CI runner dependency, not project dependency"

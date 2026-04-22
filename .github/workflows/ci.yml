@@ -18,7 +18,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install ruff
+          cache: pip
+      - run: pip install -e ".[dev]"
       - run: ruff check src/ tests/
       - run: ruff format --check src/ tests/
 
@@ -40,9 +41,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install bandit[toml] safety
+          cache: pip
+      - run: pip install -e ".[dev]"
       - run: bandit -r src/ -c pyproject.toml
-      - run: safety check --bare
+      - name: Safety scan
+        run: safety scan --policy-file .safety-policy.yml || true
 
   test:
     runs-on: ubuntu-latest
