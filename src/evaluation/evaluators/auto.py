@@ -2,7 +2,7 @@ from src.common.types import QuestionType, ScoreResult
 
 
 class AutoEvaluator:
-    def evaluate(self, question: str, answer: str, question_type: QuestionType) -> ScoreResult:
+    def evaluate(self, question: str, answer: str, question_type: QuestionType) -> ScoreResult:  # noqa: ARG002
         lowered_answer = answer.lower()
         if question_type is QuestionType.FACTUAL:
             keywords = ("docker", "container")

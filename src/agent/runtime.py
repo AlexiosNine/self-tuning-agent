@@ -1,10 +1,11 @@
+from src.agent.providers.base import ModelProvider
 from src.agent.strategies.prompt import render_system_prompt
 from src.common.types import AnswerResult, ProviderRequest
 from src.harness.version_manager import VersionManager
 
 
 class AgentRuntime:
-    def __init__(self, version_manager: VersionManager, provider: object, model_name: str) -> None:
+    def __init__(self, version_manager: VersionManager, provider: ModelProvider, model_name: str) -> None:
         self.version_manager = version_manager
         self.provider = provider
         self.model_name = model_name

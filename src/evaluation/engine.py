@@ -1,9 +1,9 @@
-from src.common.types import EvaluationRecord
+from src.common.types import EvaluationRecord, Evaluator
 from src.evaluation.classifiers.task_classifier import TaskClassifier
 
 
 class EvaluationEngine:
-    def __init__(self, evaluator: object) -> None:
+    def __init__(self, evaluator: Evaluator) -> None:
         self.evaluator = evaluator
         self.classifier = TaskClassifier()
 

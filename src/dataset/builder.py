@@ -21,10 +21,6 @@ class DatasetBuilder:
         generic_dir = self.output_dir / "processed" / "finetuning" / "generic"
         generic_dir.mkdir(parents=True, exist_ok=True)
         output_path = generic_dir / "train.jsonl"
-        lines = [
-            self.converter.to_generic(record)
-            for record in records
-            if self.quality_filter.is_high_quality(record)
-        ]
+        lines = [self.converter.to_generic(record) for record in records if self.quality_filter.is_high_quality(record)]
         output_path.write_text("\n".join(lines))
         return output_path

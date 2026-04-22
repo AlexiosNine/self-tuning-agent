@@ -1,16 +1,16 @@
-from enum import Enum
+from enum import StrEnum
 from typing import Protocol
 
 from pydantic import BaseModel, Field
 
 
-class QuestionType(str, Enum):
+class QuestionType(StrEnum):
     FACTUAL = "factual"
     REASONING = "reasoning"
     CREATIVE = "creative"
 
 
-class StrategyStatus(str, Enum):
+class StrategyStatus(StrEnum):
     DRAFT = "draft"
     OFFLINE_EVAL = "offline_eval"
     CANARY = "canary"

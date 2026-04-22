@@ -12,8 +12,4 @@ class QualityFilter:
 
     def is_high_quality(self, record: EvaluationRecord) -> bool:
         has_positive_human_label = record.human_label in {None, "positive"}
-        return (
-            record.auto_score >= 0.8
-            and has_positive_human_label
-            and len(record.answer.strip()) >= 10
-        )
+        return record.auto_score >= 0.8 and has_positive_human_label and len(record.answer.strip()) >= 10

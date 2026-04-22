@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -15,9 +16,10 @@ class VersionManager:
         data = json.loads(metadata_path.read_text())
         return StrategyVersion.model_validate(data)
 
-    def load_prompt_config(self, version_id: str) -> dict:
+    def load_prompt_config(self, version_id: str) -> dict[str, Any]:
         prompt_path = self.strategies_dir / version_id / "prompt.yaml"
-        return yaml.safe_load(prompt_path.read_text())
+        result: dict[str, Any] = yaml.safe_load(prompt_path.read_text())
+        return result
 
     def promote_to_production(self, version_id: str) -> None:
         version_dir = self.strategies_dir / version_id
@@ -29,7 +31,7 @@ class VersionManager:
         updated = version.model_copy(update={"status": StrategyStatus.PRODUCTION})
         (version_dir / "metadata.json").write_text(updated.model_dump_json(indent=2))
 
-    def create_version(self, version_id: str, parent_version: str | None, prompt_config: dict) -> None:
+    def create_version(self, version_id: str, parent_version: str | None, prompt_config: dict[str, Any]) -> None:
         version_dir = self.strategies_dir / version_id
         version_dir.mkdir(parents=True, exist_ok=False)
         (version_dir / "prompt.yaml").write_text(yaml.safe_dump(prompt_config))

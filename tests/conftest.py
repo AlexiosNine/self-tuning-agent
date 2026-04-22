@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import pytest
-import yaml
 
 from src.agent.runtime import AgentRuntime
 from src.common.types import ProviderRequest
@@ -26,7 +25,7 @@ class FakeProvider:
         return self.answer
 
 
-@pytest.fixture()
+@pytest.fixture
 def strategies_dir(tmp_path: Path) -> Path:
     """Create a strategies directory with a v001 version promoted to production."""
     strategies = tmp_path / "strategies"
@@ -36,31 +35,31 @@ def strategies_dir(tmp_path: Path) -> Path:
     return strategies
 
 
-@pytest.fixture()
+@pytest.fixture
 def version_manager(strategies_dir: Path) -> VersionManager:
     return VersionManager(strategies_dir)
 
 
-@pytest.fixture()
+@pytest.fixture
 def fake_provider() -> FakeProvider:
     return FakeProvider()
 
 
-@pytest.fixture()
+@pytest.fixture
 def agent_runtime(version_manager: VersionManager, fake_provider: FakeProvider) -> AgentRuntime:
     return AgentRuntime(version_manager=version_manager, provider=fake_provider, model_name="test-model")
 
 
-@pytest.fixture()
+@pytest.fixture
 def evaluation_engine() -> EvaluationEngine:
     return EvaluationEngine(evaluator=AutoEvaluator())
 
 
-@pytest.fixture()
+@pytest.fixture
 def harness_orchestrator(version_manager: VersionManager) -> HarnessOrchestrator:
     return HarnessOrchestrator(version_manager=version_manager, min_samples=1)
 
 
-@pytest.fixture()
+@pytest.fixture
 def dataset_builder(tmp_path: Path) -> DatasetBuilder:
     return DatasetBuilder(output_dir=tmp_path / "dataset_output")
