@@ -79,6 +79,47 @@ print(f"Answer: {result.answer}")
 print(f"Strategy: {result.strategy_version}")
 ```
 
+## Error Handling
+
+The agent uses a structured exception hierarchy for robust error handling:
+
+### Exception Hierarchy
+
+- `SelfTuningAgentError`: Base exception for all agent errors
+  - `VersionNotFoundError`: Strategy version does not exist
+  - `VersionAlreadyExistsError`: Attempted to create existing version
+  - `InvalidVersionStateError`: Invalid state for requested operation
+  - `FileOperationError`: File system operation failed
+  - `ProviderError`: LLM provider call failed
+
+### Example Usage
+
+```python
+from src.agent.runtime import AgentRuntime
+from src.common.exceptions import VersionNotFoundError, ProviderError
+
+try:
+    result = runtime.answer("What is Docker?")
+    print(result.answer)
+except VersionNotFoundError:
+    print("No production strategy version configured")
+except ProviderError as e:
+    print(f"LLM provider error: {e}")
+except ValueError as e:
+    print(f"Invalid input: {e}")
+```
+
+### Logging
+
+Configure logging via `config.yaml`:
+
+```yaml
+log_level: INFO  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+log_file: logs/agent.log  # Optional file output
+```
+
+See [docs/ERROR_HANDLING.md](docs/ERROR_HANDLING.md) for detailed error handling guide.
+
 ## Development
 
 ### Project Structure

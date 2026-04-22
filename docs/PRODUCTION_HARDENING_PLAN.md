@@ -36,7 +36,7 @@ graph TD
 
 **文件**: `src/common/logger.py` (NEW), `src/common/exceptions.py` (NEW), `LICENSE` (NEW)
 
-- [ ] **Task 1.1**：创建日志基础设施（2 点）
+- [x] **Task 1.1**：创建日志基础设施（2 点）
   - **输入**：无
   - **输出**：`src/common/logger.py` 模块
   - **关键步骤**：
@@ -45,7 +45,7 @@ graph TD
     3. 添加单元测试验证 console 和 file 输出
   - **验证**：`pytest tests/unit/test_logger.py -v`
 
-- [ ] **Task 1.2**：创建异常层次结构（2 点）
+- [x] **Task 1.2**：创建异常层次结构（2 点）
   - **输入**：无
   - **输出**：`src/common/exceptions.py` 模块
   - **关键步骤**：
@@ -54,7 +54,7 @@ graph TD
     3. 添加单元测试验证异常继承关系
   - **验证**：`pytest tests/unit/test_exceptions.py -v`
 
-- [ ] **Task 1.3**：添加 LICENSE 文件（1 点）
+- [x] **Task 1.3**：添加 LICENSE 文件（1 点）
   - **输入**：README.md line 221 声明 MIT License
   - **输出**：`LICENSE` 文件
   - **关键步骤**：
@@ -62,7 +62,7 @@ graph TD
     2. 设置 Copyright (c) 2026 AlexiosNine
   - **验证**：文件存在且内容正确
 
-- [ ] **Task 1.4**：添加 Config 日志配置（1 点）
+- [x] **Task 1.4**：添加 Config 日志配置（1 点）
   - **输入**：Task 1.1 完成
   - **输出**：`src/common/config.py` 修改
   - **关键步骤**：
@@ -76,7 +76,7 @@ graph TD
 
 **文件**: `src/harness/version_manager.py`, `src/agent/runtime.py`, `src/agent/providers/claude.py`
 
-- [ ] **Task 2.1**：VersionManager 错误处理（3 点）
+- [x] **Task 2.1**：VersionManager 错误处理（3 点）
   - **输入**：Task 1.1, 1.2 完成
   - **输出**：`src/harness/version_manager.py` 修改
   - **关键步骤**：
@@ -97,7 +97,7 @@ graph TD
             manager.load_version("v001")
     ```
 
-- [ ] **Task 2.2**：修复 Symlink 竞态条件（2 点）
+- [x] **Task 2.2**：修复 Symlink 竞态条件（2 点）
   - **输入**：Task 2.1 完成
   - **输出**：`src/harness/version_manager.py` 的 `promote_to_production()` 修改
   - **关键步骤**：
@@ -156,7 +156,7 @@ graph TD
         assert len(errors) <= 4
     ```
 
-- [ ] **Task 2.3**：AgentRuntime 错误处理（2 点）
+- [x] **Task 2.3**：AgentRuntime 错误处理（2 点）
   - **输入**：Task 2.1 完成
   - **输出**：`src/agent/runtime.py` 修改
   - **关键步骤**：
@@ -216,7 +216,7 @@ graph TD
             runtime.answer("x" * 10001)
     ```
 
-- [ ] **Task 2.4**：ClaudeProvider 重试逻辑（1 点）
+- [x] **Task 2.4**：ClaudeProvider 重试逻辑（1 点）
   - **输入**：Task 1.2 完成
   - **输出**：`src/agent/providers/claude.py` 修改
   - **关键步骤**：
@@ -291,7 +291,7 @@ graph TD
 
 **文件**: `src/harness/optimizer.py`, `src/harness/version_manager.py`
 
-- [ ] **Task 3.1**：改进策略变异逻辑（2 点）
+- [x] **Task 3.1**：改进策略变异逻辑（2 点）
   - **输入**：Task 2.1 完成
   - **输出**：`src/harness/optimizer.py` 修改
   - **关键步骤**：
@@ -350,7 +350,7 @@ graph TD
             assert mutation_type.value.replace("_", " ") in config["system_prompt"].lower()
     ```
 
-- [ ] **Task 3.2**：实现回滚功能（3 点）
+- [x] **Task 3.2**：实现回滚功能（3 点）
   - **输入**：Task 2.1, 2.2 完成
   - **输出**：`src/harness/version_manager.py` 添加 `rollback()` 方法
   - **关键步骤**：
@@ -431,7 +431,7 @@ graph TD
             manager.rollback("v001")
     ```
 
-- [ ] **Task 3.3**：添加负面测试用例（2 点）
+- [x] **Task 3.3**：添加负面测试用例（2 点）
   - **输入**：Phase 2 所有任务完成
   - **输出**：新增测试文件
   - **关键步骤**：
