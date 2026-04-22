@@ -1,7 +1,9 @@
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from src.common.logger import setup_logger
 
 
 class ModelConfig(BaseModel):
@@ -23,8 +25,15 @@ class AppConfig(BaseModel):
     model: ModelConfig
     paths: PathConfig
     thresholds: ThresholdConfig
+    log_level: str = Field(default="INFO", description="Logging level")
+    log_file: Path | None = Field(default=None, description="Optional log file path")
 
 
 def load_config(file_path: Path) -> AppConfig:
     data = yaml.safe_load(file_path.read_text())
-    return AppConfig.model_validate(data)
+    config = AppConfig.model_validate(data)
+
+    # Initialize logger
+    setup_logger("self-tuning-agent", level=config.log_level, log_file=config.log_file)
+
+    return config

@@ -7,3 +7,5 @@ paths:
 thresholds:
   min_samples: 100
   canary_ratio: 0.1
+log_level: INFO
+log_file: null
