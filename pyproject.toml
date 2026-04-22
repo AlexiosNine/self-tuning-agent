@@ -1,5 +1,5 @@
 [project]
-name = "self-tunning"
+name = "self-tuning-agent"
 version = "0.1.0"
 description = "Harness-based self-tuning QA agent"
 readme = "README.md"
