@@ -1,5 +1,3 @@
-from typing import cast
-
 from anthropic import Anthropic
 from anthropic.types import TextBlock
 
@@ -19,5 +17,6 @@ class ClaudeProvider:
         )
         first_block = response.content[0]
         if isinstance(first_block, TextBlock):
-            return cast(str, first_block.text)
+            text: str = first_block.text
+            return text
         return ""
