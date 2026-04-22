@@ -74,7 +74,10 @@ class VersionManager:
         prompt_path = self.strategies_dir / version_id / "prompt.yaml"
 
         try:
-            result: dict[str, Any] = yaml.safe_load(prompt_path.read_text())
+            data = yaml.safe_load(prompt_path.read_text())
+            if data is None:
+                raise FileOperationError(f"Empty prompt config for version {version_id}")
+            result: dict[str, Any] = data
             logger.info(f"Loaded prompt config for {version_id}")
             return result
         except FileNotFoundError as e:
@@ -115,8 +118,7 @@ class VersionManager:
             logger.info(f"Symlink updated to {version_id}")
         except OSError as e:
             logger.error(f"Failed to create symlink: {e}")
-            if temp_link.exists():
-                temp_link.unlink()
+            temp_link.unlink(missing_ok=True)
             raise FileOperationError(f"Symlink operation failed: {e}") from e
 
         # Update metadata
