@@ -1,6 +1,6 @@
 # Self-Tuning Agent
 
-[![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
+[![CI](https://github.com/AlexiosNine/self-tuning-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexiosNine/self-tuning-agent/actions/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -28,7 +28,7 @@ Three-layer architecture:
 
 ```bash
 # Clone the repository
-git clone https://github.com/OWNER/REPO.git
+git clone https://github.com/AlexiosNine/self-tuning-agent.git
 cd self-tunning
 
 # Install dependencies
@@ -175,7 +175,7 @@ docker run -it --rm \
 ### Using Pre-built Image
 
 ```bash
-docker pull ghcr.io/OWNER/REPO:latest
+docker pull ghcr.io/AlexiosNine/self-tuning-agent:latest
 ```
 
 ## Configuration
