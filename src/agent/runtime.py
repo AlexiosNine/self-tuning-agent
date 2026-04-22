@@ -1,5 +1,4 @@
-import logging
-
+from src.agent.providers.base import ModelProvider
 from src.agent.strategies.prompt import render_system_prompt
 from src.common.exceptions import VersionNotFoundError
 from src.common.logger import setup_logger
@@ -12,7 +11,7 @@ MAX_QUESTION_LENGTH = 10000
 
 
 class AgentRuntime:
-    def __init__(self, version_manager: VersionManager, provider: object, model_name: str) -> None:
+    def __init__(self, version_manager: VersionManager, provider: ModelProvider, model_name: str) -> None:
         self.version_manager = version_manager
         self.provider = provider
         self.model_name = model_name

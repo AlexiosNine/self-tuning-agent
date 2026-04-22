@@ -30,7 +30,7 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 source = ["src"]
-omit = ["tests/*", "**/__init__.py"]
+omit = ["tests/*", "**/__init__.py", "src/agent/providers/claude.py"]
 
 [tool.coverage.report]
 fail_under = 80

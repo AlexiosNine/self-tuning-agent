@@ -22,9 +22,7 @@ class ClaudeProvider:
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10),
-        retry=retry_if_exception_type(
-            (anthropic.APIStatusError, anthropic.APIConnectionError)
-        ),
+        retry=retry_if_exception_type((anthropic.APIStatusError, anthropic.APIConnectionError)),
         reraise=True,
     )
     def generate(self, request: ProviderRequest) -> str:
