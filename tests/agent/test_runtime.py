@@ -1,0 +1,31 @@
+from pathlib import Path
+
+from src.agent.runtime import AgentRuntime
+from src.common.types import ProviderRequest
+from src.harness.version_manager import VersionManager
+
+
+class FakeProvider:
+    def __init__(self) -> None:
+        self.last_request: ProviderRequest | None = None
+
+    def generate(self, request: ProviderRequest) -> str:
+        self.last_request = request
+        return "Docker is a container platform."
+
+
+def test_runtime_uses_current_strategy_prompt(tmp_path: Path) -> None:
+    strategies_dir = tmp_path / "strategies"
+    manager = VersionManager(strategies_dir)
+    manager.create_version("v001", None, {"system_prompt": "Answer clearly."})
+    manager.promote_to_production("v001")
+
+    provider = FakeProvider()
+    runtime = AgentRuntime(version_manager=manager, provider=provider, model_name="claude-sonnet-4-6")
+
+    result = runtime.answer("What is Docker?")
+
+    assert result.answer == "Docker is a container platform."
+    assert result.strategy_version == "v001"
+    assert provider.last_request is not None
+    assert provider.last_request.system_prompt == "Answer clearly."
