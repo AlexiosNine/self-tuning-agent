@@ -37,3 +37,4 @@ strategies/
 datasets/
 *.tar.gz
 .secrets.baseline
+.ace-tool/
