@@ -23,6 +23,7 @@ logger = setup_logger(__name__)
 class VersionManager:
     def __init__(self, strategies_dir: Path) -> None:
         self.strategies_dir = strategies_dir
+        self._prompt_cache: dict[str, dict[str, Any]] = {}
 
     def load_version(self, version_id: str) -> StrategyVersion:
         """Load version metadata from disk.
@@ -72,6 +73,10 @@ class VersionManager:
             VersionNotFoundError: Version does not exist
             FileOperationError: Failed to read or parse prompt config
         """
+        if version_id in self._prompt_cache:
+            logger.debug(f"Returning cached prompt config for {version_id}")
+            return self._prompt_cache[version_id]
+
         prompt_path = self.strategies_dir / version_id / "prompt.yaml"
 
         try:
@@ -79,6 +84,7 @@ class VersionManager:
             if data is None:
                 raise FileOperationError(f"Empty prompt config for version {version_id}")
             result: dict[str, Any] = data
+            self._prompt_cache[version_id] = result
             logger.info(f"Loaded prompt config for {version_id}")
             return result
         except FileNotFoundError as e:
@@ -196,6 +202,8 @@ class VersionManager:
         except OSError as e:
             logger.error(f"Failed to create version directory for {version_id}: {e}")
             raise FileOperationError(f"Failed to create version {version_id}: {e}") from e
+
+        self._prompt_cache.pop(version_id, None)
 
         try:
             (version_dir / "prompt.yaml").write_text(yaml.safe_dump(prompt_config))

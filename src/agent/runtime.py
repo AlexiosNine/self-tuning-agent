@@ -1,7 +1,14 @@
+import time
+
 from src.agent.providers.base import ModelProvider
 from src.agent.strategies.prompt import render_system_prompt
-from src.common.exceptions import VersionNotFoundError
+from src.common.exceptions import ProviderError, VersionNotFoundError
 from src.common.logger import setup_logger
+from src.common.metrics import (
+    answer_latency_seconds,
+    answer_requests_failed,
+    answer_requests_total,
+)
 from src.common.types import AnswerResult, ProviderRequest
 from src.harness.version_manager import VersionManager
 
@@ -38,7 +45,30 @@ class AgentRuntime:
             model_name=self.model_name,
         )
 
-        answer = self.provider.generate(request)
-        logger.info("Generated answer (version=%s, length=%d)", version_id, len(answer))
+        start_time = time.time()
+        try:
+            answer = self.provider.generate(request)
+            latency = time.time() - start_time
 
-        return AnswerResult(answer=answer, strategy_version=version_id, model_name=self.model_name)
+            answer_requests_total.labels(strategy_version=version_id, model_name=self.model_name).inc()
+            answer_latency_seconds.labels(strategy_version=version_id, model_name=self.model_name).observe(latency)
+
+            logger.info("Generated answer (version=%s, length=%d, latency=%.2fs)", version_id, len(answer), latency)
+
+            return AnswerResult(answer=answer, strategy_version=version_id, model_name=self.model_name)
+        except ProviderError as e:
+            latency = time.time() - start_time
+            answer_requests_failed.labels(
+                strategy_version=version_id, model_name=self.model_name, error_type="provider_error"
+            ).inc()
+            answer_latency_seconds.labels(strategy_version=version_id, model_name=self.model_name).observe(latency)
+            logger.error("Provider error (version=%s, latency=%.2fs): %s", version_id, latency, e)
+            raise
+        except Exception as e:
+            latency = time.time() - start_time
+            answer_requests_failed.labels(
+                strategy_version=version_id, model_name=self.model_name, error_type="unexpected_error"
+            ).inc()
+            answer_latency_seconds.labels(strategy_version=version_id, model_name=self.model_name).observe(latency)
+            logger.error("Unexpected error (version=%s, latency=%.2fs): %s", version_id, latency, e)
+            raise

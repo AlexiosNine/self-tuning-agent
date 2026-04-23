@@ -1,4 +1,5 @@
 import anthropic
+import pybreaker
 from anthropic import Anthropic
 from anthropic.types import TextBlock
 from tenacity import (
@@ -16,8 +17,9 @@ logger = setup_logger(__name__)
 
 
 class ClaudeProvider:
-    def __init__(self, client: Anthropic) -> None:
+    def __init__(self, client: Anthropic, fail_max: int = 5, reset_timeout: int = 60) -> None:
         self.client = client
+        self._breaker = pybreaker.CircuitBreaker(fail_max=fail_max, reset_timeout=reset_timeout)
 
     @retry(
         stop=stop_after_attempt(3),
@@ -26,6 +28,13 @@ class ClaudeProvider:
         reraise=True,
     )
     def generate(self, request: ProviderRequest) -> str:
+        try:
+            return self._breaker.call(self._do_generate, request)
+        except pybreaker.CircuitBreakerError as e:
+            logger.error("Circuit breaker open: %s", e)
+            raise ProviderError("Circuit breaker open: too many consecutive failures") from e
+
+    def _do_generate(self, request: ProviderRequest) -> str:
         logger.info("Calling Claude API: model=%s", request.model_name)
         try:
             response = self.client.messages.create(

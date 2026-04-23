@@ -57,7 +57,9 @@ class StrategyOptimizer:
         mutation_type = select_mutation_type(records) if records else MutationType.SIMPLIFY
         logger.info(
             "Creating mutation %s from %s (type=%s)",
-            new_version, parent_version, mutation_type,
+            new_version,
+            parent_version,
+            mutation_type,
         )
 
         parent_prompt = self.version_manager.load_prompt_config(parent_version)
