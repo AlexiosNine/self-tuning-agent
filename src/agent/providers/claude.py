@@ -61,7 +61,9 @@ class ClaudeProvider:
             first_block = response.content[0]
             if isinstance(first_block, TextBlock):
                 text: str = first_block.text
-                logger.info("Claude response: %d chars, tokens: input=%d output=%d", len(text), input_tokens, output_tokens)
+                logger.info(
+                    "Claude response: %d chars, tokens: input=%d output=%d", len(text), input_tokens, output_tokens
+                )
                 return (text, input_tokens, output_tokens)
             raise ProviderError("Unexpected response format: no TextBlock")
         except (anthropic.APIStatusError, anthropic.APIConnectionError):

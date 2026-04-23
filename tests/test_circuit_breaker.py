@@ -23,6 +23,7 @@ def provider(mock_client: Mock) -> ClaudeProvider:
 @pytest.mark.asyncio
 async def test_circuit_breaker_opens_after_failures(provider: ClaudeProvider, mock_client: Mock) -> None:
     """Test that circuit breaker opens after consecutive failures."""
+
     # Create an async mock that raises an exception
     async def raise_error(*args: object, **kwargs: object) -> None:
         raise Exception("API error")
