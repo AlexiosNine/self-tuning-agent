@@ -84,7 +84,7 @@ class ABTestManager:
         else:
             # Note: random.random() is sufficient for A/B testing traffic splitting
             # This is not used for cryptographic purposes
-            ratio = random.random()  # nosec B311
+            ratio = random.random()  # noqa: S311  # nosec B311
 
         if ratio < self._active_test.treatment_ratio:
             logger.debug("Routing to treatment version: %s", self._active_test.treatment_version)
