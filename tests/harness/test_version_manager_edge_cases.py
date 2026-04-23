@@ -130,12 +130,13 @@ def test_load_prompt_config_unicode(tmp_path: Path) -> None:
 
 
 def test_create_version_with_path_traversal(tmp_path: Path) -> None:
-    """Version ID with path traversal stays within strategies_dir."""
+    """Version ID with path traversal is rejected with ValueError."""
     manager = VersionManager(tmp_path)
-    manager.create_version("../escape", None, {"system_prompt": "test"})
+    with pytest.raises(ValueError, match="path"):
+        manager.create_version("../escape", None, {"system_prompt": "test"})
 
-    # The directory is created relative to strategies_dir
-    assert (tmp_path / ".." / "escape").exists() or (tmp_path / "../escape").exists()
+    # Confirm nothing was written outside strategies_dir
+    assert not (tmp_path.parent / "escape").exists()
 
 
 def test_load_version_empty_id(tmp_path: Path) -> None:

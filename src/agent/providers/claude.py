@@ -1,3 +1,4 @@
+import time
 from datetime import timedelta
 
 import anthropic
@@ -13,7 +14,11 @@ from tenacity import (
 
 from src.common.exceptions import ProviderError
 from src.common.logger import setup_logger
-from src.common.metrics import circuit_breaker_failures, circuit_breaker_state
+from src.common.metrics import (
+    circuit_breaker_failures,
+    circuit_breaker_state,
+    provider_call_latency_seconds,
+)
 from src.common.types import ProviderRequest
 
 logger = setup_logger(__name__)
@@ -44,6 +49,7 @@ class ClaudeProvider:
 
     async def _do_generate(self, request: ProviderRequest) -> tuple[str, int, int]:
         logger.info("Calling Claude API: model=%s", request.model_name)
+        start_time = time.time()
         try:
             response = await self.client.messages.create(
                 model=request.model_name,
@@ -51,6 +57,9 @@ class ClaudeProvider:
                 system=request.system_prompt,
                 messages=[{"role": "user", "content": request.user_prompt}],
             )
+
+            latency = time.time() - start_time
+            provider_call_latency_seconds.labels(model_name=request.model_name).observe(latency)
 
             # Extract token usage with defensive check
             input_tokens = 0

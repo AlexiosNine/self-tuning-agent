@@ -191,8 +191,28 @@ class VersionManager:
         Raises:
             VersionAlreadyExistsError: Version already exists
             FileOperationError: Failed to create version files
+            ValueError: Invalid version_id (path traversal detected)
         """
+        # Validate version_id to prevent path traversal
+        if not version_id:
+            raise ValueError("version_id cannot be empty")
+
+        if "/" in version_id or "\\" in version_id:
+            raise ValueError(f"Invalid version_id: {version_id} (cannot contain path separators)")
+
+        if version_id in (".", ".."):
+            raise ValueError(f"Invalid version_id: {version_id} (cannot be . or ..)")
+
         version_dir = self.strategies_dir / version_id
+
+        # Additional check: ensure resolved path is within strategies_dir
+        try:
+            resolved = version_dir.resolve()
+            if not resolved.is_relative_to(self.strategies_dir.resolve()):
+                raise ValueError(f"Invalid version_id: {version_id} (path traversal detected)")
+        except ValueError:
+            # is_relative_to raises ValueError if not relative
+            raise ValueError(f"Invalid version_id: {version_id} (path traversal detected)")
 
         try:
             version_dir.mkdir(parents=True, exist_ok=False)

@@ -5,6 +5,7 @@ from src.common.metrics import (
     answer_latency_seconds,
     answer_requests_failed,
     answer_requests_total,
+    provider_call_latency_seconds,
 )
 
 
