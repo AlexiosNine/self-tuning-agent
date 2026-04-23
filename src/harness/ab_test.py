@@ -56,7 +56,9 @@ class ABTestManager:
     def stop_test(self) -> None:
         """Stop the active A/B test."""
         if self._active_test:
-            logger.info("Stopped A/B test: %s vs %s", self._active_test.control_version, self._active_test.treatment_version)
+            logger.info(
+                "Stopped A/B test: %s vs %s", self._active_test.control_version, self._active_test.treatment_version
+            )
             self._active_test = None
 
     def get_version_for_request(self, request_id: str | None = None) -> str:
@@ -82,7 +84,7 @@ class ABTestManager:
         else:
             # Note: random.random() is sufficient for A/B testing traffic splitting
             # This is not used for cryptographic purposes
-            ratio = random.random()  # noqa: S311
+            ratio = random.random()  # nosec B311
 
         if ratio < self._active_test.treatment_ratio:
             logger.debug("Routing to treatment version: %s", self._active_test.treatment_version)

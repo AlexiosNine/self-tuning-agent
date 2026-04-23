@@ -17,7 +17,10 @@ def test_metrics_registered() -> None:
     assert "agent_answer_requests_failed" in metric_names or "agent_answer_requests_failed_total" in metric_names
     assert "agent_answer_latency_seconds" in metric_names
     assert "agent_provider_call_latency_seconds" in metric_names
-    assert "agent_circuit_breaker_state_changes" in metric_names or "agent_circuit_breaker_state_changes_total" in metric_names
+    assert (
+        "agent_circuit_breaker_state_changes" in metric_names
+        or "agent_circuit_breaker_state_changes_total" in metric_names
+    )
     assert "agent_circuit_breaker_failures" in metric_names or "agent_circuit_breaker_failures_total" in metric_names
 
 
