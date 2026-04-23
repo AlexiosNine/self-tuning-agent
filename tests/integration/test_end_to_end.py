@@ -6,6 +6,8 @@ Tests the complete flow: runtime → evaluation → harness → dataset.
 import json
 from pathlib import Path
 
+import pytest
+
 from src.agent.runtime import AgentRuntime
 from src.common.types import QuestionType
 from src.dataset.builder import DatasetBuilder
@@ -17,7 +19,8 @@ from tests.conftest import FakeProvider
 class TestEndToEndHappyPath:
     """Happy path: good answer → high score → dataset export → no optimization."""
 
-    def test_full_flow_good_answer_skips_optimization(
+    @pytest.mark.asyncio
+    async def test_full_flow_good_answer_skips_optimization(
         self,
         agent_runtime: AgentRuntime,
         evaluation_engine: EvaluationEngine,
@@ -25,7 +28,7 @@ class TestEndToEndHappyPath:
         dataset_builder: DatasetBuilder,
     ) -> None:
         # Step 1: Agent answers a factual question
-        answer_result = agent_runtime.answer("What is Docker?")
+        answer_result = await agent_runtime.answer("What is Docker?")
         assert "docker" in answer_result.answer.lower()
         assert "container" in answer_result.answer.lower()
         assert answer_result.strategy_version == "v001"
@@ -51,25 +54,27 @@ class TestEndToEndHappyPath:
         assert exported["answer"] == answer_result.answer
         assert exported["metadata"]["auto_eval_score"] == 1.0
 
-    def test_runtime_answer_flows_through_evaluation(
+    @pytest.mark.asyncio
+    async def test_runtime_answer_flows_through_evaluation(
         self,
         agent_runtime: AgentRuntime,
         evaluation_engine: EvaluationEngine,
     ) -> None:
-        result = agent_runtime.answer("What is Docker?")
+        result = await agent_runtime.answer("What is Docker?")
         record = evaluation_engine.evaluate(question="What is Docker?", answer=result.answer)
 
         assert record.question == "What is Docker?"
         assert record.answer == result.answer
         assert record.auto_score >= 0.8
 
-    def test_high_score_record_passes_dataset_quality_filter(
+    @pytest.mark.asyncio
+    async def test_high_score_record_passes_dataset_quality_filter(
         self,
         agent_runtime: AgentRuntime,
         evaluation_engine: EvaluationEngine,
         dataset_builder: DatasetBuilder,
     ) -> None:
-        result = agent_runtime.answer("What is Docker?")
+        result = await agent_runtime.answer("What is Docker?")
         record = evaluation_engine.evaluate(question="What is Docker?", answer=result.answer)
 
         output_path = dataset_builder.build_generic_dataset([record])
@@ -82,7 +87,8 @@ class TestEndToEndHappyPath:
 class TestEndToEndLowScore:
     """Low score path: bad answer → low score → optimization triggered → no dataset export."""
 
-    def test_low_score_triggers_optimization(
+    @pytest.mark.asyncio
+    async def test_low_score_triggers_optimization(
         self,
         version_manager,
         evaluation_engine: EvaluationEngine,
@@ -94,7 +100,7 @@ class TestEndToEndLowScore:
         bad_provider = FakeProvider(answer="It is a software tool.")
         runtime = AgentRuntime(version_manager=version_manager, provider=bad_provider, model_name="test-model")
 
-        result = runtime.answer("What is Docker?")
+        result = await runtime.answer("What is Docker?")
         record = evaluation_engine.evaluate(question="What is Docker?", answer=result.answer)
 
         # Score should be low (0.3) because answer lacks "docker" and "container"
@@ -114,7 +120,8 @@ class TestEndToEndLowScore:
 class TestEndToEndMultipleQuestions:
     """Multiple questions flow through the pipeline together."""
 
-    def test_mixed_scores_partial_export(
+    @pytest.mark.asyncio
+    async def test_mixed_scores_partial_export(
         self,
         version_manager,
         evaluation_engine: EvaluationEngine,
@@ -126,8 +133,8 @@ class TestEndToEndMultipleQuestions:
         bad_provider = FakeProvider(answer="I don't know.")
         bad_runtime = AgentRuntime(version_manager=version_manager, provider=bad_provider, model_name="test-model")
 
-        good_result = good_runtime.answer("What is Docker?")
-        bad_result = bad_runtime.answer("What is Docker?")
+        good_result = await good_runtime.answer("What is Docker?")
+        bad_result = await bad_runtime.answer("What is Docker?")
 
         good_record = evaluation_engine.evaluate(question="What is Docker?", answer=good_result.answer)
         bad_record = evaluation_engine.evaluate(question="What is Docker?", answer=bad_result.answer)

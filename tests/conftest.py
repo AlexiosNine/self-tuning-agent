@@ -20,9 +20,9 @@ class FakeProvider:
         self.answer = answer
         self.last_request: ProviderRequest | None = None
 
-    def generate(self, request: ProviderRequest) -> str:
+    async def generate(self, request: ProviderRequest) -> tuple[str, int, int]:
         self.last_request = request
-        return self.answer
+        return (self.answer, 10, 5)
 
 
 @pytest.fixture

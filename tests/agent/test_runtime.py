@@ -12,12 +12,13 @@ class FakeProvider:
     def __init__(self) -> None:
         self.last_request: ProviderRequest | None = None
 
-    def generate(self, request: ProviderRequest) -> str:
+    async def generate(self, request: ProviderRequest) -> tuple[str, int, int]:
         self.last_request = request
-        return "Docker is a container platform."
+        return ("Docker is a container platform.", 10, 5)
 
 
-def test_runtime_uses_current_strategy_prompt(tmp_path: Path) -> None:
+@pytest.mark.asyncio
+async def test_runtime_uses_current_strategy_prompt(tmp_path: Path) -> None:
     strategies_dir = tmp_path / "strategies"
     manager = VersionManager(strategies_dir)
     manager.create_version("v001", None, {"system_prompt": "Answer clearly."})
@@ -26,7 +27,7 @@ def test_runtime_uses_current_strategy_prompt(tmp_path: Path) -> None:
     provider = FakeProvider()
     runtime = AgentRuntime(version_manager=manager, provider=provider, model_name="claude-sonnet-4-6")
 
-    result = runtime.answer("What is Docker?")
+    result = await runtime.answer("What is Docker?")
 
     assert result.answer == "Docker is a container platform."
     assert result.strategy_version == "v001"
@@ -34,7 +35,8 @@ def test_runtime_uses_current_strategy_prompt(tmp_path: Path) -> None:
     assert provider.last_request.system_prompt == "Answer clearly."
 
 
-def test_answer_empty_question(tmp_path: Path) -> None:
+@pytest.mark.asyncio
+async def test_answer_empty_question(tmp_path: Path) -> None:
     strategies_dir = tmp_path / "strategies"
     manager = VersionManager(strategies_dir)
     manager.create_version("v001", None, {"system_prompt": "Test"})
@@ -43,10 +45,11 @@ def test_answer_empty_question(tmp_path: Path) -> None:
     runtime = AgentRuntime(version_manager=manager, provider=FakeProvider(), model_name="test")
 
     with pytest.raises(ValueError, match="cannot be empty"):
-        runtime.answer("")
+        await runtime.answer("")
 
 
-def test_answer_whitespace_only_question(tmp_path: Path) -> None:
+@pytest.mark.asyncio
+async def test_answer_whitespace_only_question(tmp_path: Path) -> None:
     strategies_dir = tmp_path / "strategies"
     manager = VersionManager(strategies_dir)
     manager.create_version("v001", None, {"system_prompt": "Test"})
@@ -55,10 +58,11 @@ def test_answer_whitespace_only_question(tmp_path: Path) -> None:
     runtime = AgentRuntime(version_manager=manager, provider=FakeProvider(), model_name="test")
 
     with pytest.raises(ValueError, match="cannot be empty"):
-        runtime.answer("   ")
+        await runtime.answer("   ")
 
 
-def test_answer_too_long_question(tmp_path: Path) -> None:
+@pytest.mark.asyncio
+async def test_answer_too_long_question(tmp_path: Path) -> None:
     strategies_dir = tmp_path / "strategies"
     manager = VersionManager(strategies_dir)
     manager.create_version("v001", None, {"system_prompt": "Test"})
@@ -67,14 +71,15 @@ def test_answer_too_long_question(tmp_path: Path) -> None:
     runtime = AgentRuntime(version_manager=manager, provider=FakeProvider(), model_name="test")
 
     with pytest.raises(ValueError, match="exceeds"):
-        runtime.answer("x" * 10001)
+        await runtime.answer("x" * 10001)
 
 
-def test_answer_no_production_version(tmp_path: Path) -> None:
+@pytest.mark.asyncio
+async def test_answer_no_production_version(tmp_path: Path) -> None:
     strategies_dir = tmp_path / "strategies"
     strategies_dir.mkdir()
 
     runtime = AgentRuntime(version_manager=VersionManager(strategies_dir), provider=FakeProvider(), model_name="test")
 
     with pytest.raises(VersionNotFoundError, match="No production"):
-        runtime.answer("What is Docker?")
+        await runtime.answer("What is Docker?")

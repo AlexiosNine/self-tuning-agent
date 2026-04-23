@@ -13,6 +13,19 @@ answer_requests_failed = Counter(
     ["strategy_version", "model_name", "error_type"],
 )
 
+# Token usage counters
+tokens_input_total = Counter(
+    "agent_tokens_input_total",
+    "Total input tokens consumed",
+    ["strategy_version", "model_name"],
+)
+
+tokens_output_total = Counter(
+    "agent_tokens_output_total",
+    "Total output tokens generated",
+    ["strategy_version", "model_name"],
+)
+
 # Latency histograms
 answer_latency_seconds = Histogram(
     "agent_answer_latency_seconds",

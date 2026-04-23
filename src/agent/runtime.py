@@ -8,6 +8,8 @@ from src.common.metrics import (
     answer_latency_seconds,
     answer_requests_failed,
     answer_requests_total,
+    tokens_input_total,
+    tokens_output_total,
 )
 from src.common.types import AnswerResult, ProviderRequest
 from src.harness.version_manager import VersionManager
@@ -23,7 +25,7 @@ class AgentRuntime:
         self.provider = provider
         self.model_name = model_name
 
-    def answer(self, question: str) -> AnswerResult:
+    async def answer(self, question: str) -> AnswerResult:
         if not question or not question.strip():
             raise ValueError("Question cannot be empty")
         if len(question) > MAX_QUESTION_LENGTH:
@@ -47,11 +49,13 @@ class AgentRuntime:
 
         start_time = time.time()
         try:
-            answer = self.provider.generate(request)
+            answer, input_tokens, output_tokens = await self.provider.generate(request)
             latency = time.time() - start_time
 
             answer_requests_total.labels(strategy_version=version_id, model_name=self.model_name).inc()
             answer_latency_seconds.labels(strategy_version=version_id, model_name=self.model_name).observe(latency)
+            tokens_input_total.labels(strategy_version=version_id, model_name=self.model_name).inc(input_tokens)
+            tokens_output_total.labels(strategy_version=version_id, model_name=self.model_name).inc(output_tokens)
 
             logger.info("Generated answer (version=%s, length=%d, latency=%.2fs)", version_id, len(answer), latency)
 
