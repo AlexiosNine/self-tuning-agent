@@ -1,7 +1,7 @@
 from unittest.mock import AsyncMock, Mock
 
-import pybreaker
 import pytest
+from aiobreaker import CircuitBreakerState
 from anthropic import AsyncAnthropic
 from anthropic.types import TextBlock
 
@@ -68,13 +68,15 @@ async def test_circuit_breaker_allows_success(provider: ClaudeProvider, mock_cli
 
     result = await provider.generate(request)
     assert result == ("Test answer", 10, 5)
-    assert provider._breaker.current_state == pybreaker.STATE_CLOSED
+    assert provider._breaker.current_state == CircuitBreakerState.CLOSED
 
 
 def test_circuit_breaker_custom_config() -> None:
     """Test circuit breaker with custom configuration."""
+    from datetime import timedelta
+
     mock_client = Mock(spec=AsyncAnthropic)
     provider = ClaudeProvider(client=mock_client, fail_max=5, reset_timeout=30)
 
     assert provider._breaker.fail_max == 5
-    assert provider._breaker.reset_timeout == 30
+    assert provider._breaker.timeout_duration == timedelta(seconds=30)

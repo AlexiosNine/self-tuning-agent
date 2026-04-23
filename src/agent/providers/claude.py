@@ -1,7 +1,7 @@
-import asyncio
+from datetime import timedelta
 
 import anthropic
-import pybreaker
+from aiobreaker import CircuitBreaker, CircuitBreakerError
 from anthropic import AsyncAnthropic
 from anthropic.types import TextBlock
 from tenacity import (
@@ -21,7 +21,10 @@ logger = setup_logger(__name__)
 class ClaudeProvider:
     def __init__(self, client: AsyncAnthropic, fail_max: int = 5, reset_timeout: int = 60) -> None:
         self.client = client
-        self._breaker = pybreaker.CircuitBreaker(fail_max=fail_max, reset_timeout=reset_timeout)
+        self._breaker = CircuitBreaker(
+            fail_max=fail_max,
+            timeout_duration=timedelta(seconds=reset_timeout),
+        )
 
     @retry(
         stop=stop_after_attempt(3),
@@ -31,15 +34,10 @@ class ClaudeProvider:
     )
     async def generate(self, request: ProviderRequest) -> tuple[str, int, int]:
         try:
-            # Use asyncio.to_thread to wrap circuit breaker call since pybreaker doesn't support async
-            return await asyncio.to_thread(self._breaker.call, self._do_generate_sync, request)
-        except pybreaker.CircuitBreakerError as e:
+            return await self._breaker.call_async(self._do_generate, request)
+        except CircuitBreakerError as e:
             logger.error("Circuit breaker open: %s", e)
             raise ProviderError("Circuit breaker open: too many consecutive failures") from e
-
-    def _do_generate_sync(self, request: ProviderRequest) -> tuple[str, int, int]:
-        """Synchronous wrapper for circuit breaker compatibility."""
-        return asyncio.run(self._do_generate(request))
 
     async def _do_generate(self, request: ProviderRequest) -> tuple[str, int, int]:
         logger.info("Calling Claude API: model=%s", request.model_name)
