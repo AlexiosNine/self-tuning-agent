@@ -13,6 +13,7 @@ from tenacity import (
 
 from src.common.exceptions import ProviderError
 from src.common.logger import setup_logger
+from src.common.metrics import circuit_breaker_failures, circuit_breaker_state
 from src.common.types import ProviderRequest
 
 logger = setup_logger(__name__)
@@ -36,6 +37,8 @@ class ClaudeProvider:
         try:
             return await self._breaker.call_async(self._do_generate, request)
         except CircuitBreakerError as e:
+            circuit_breaker_failures.inc()
+            circuit_breaker_state.labels(state="open").inc()
             logger.error("Circuit breaker open: %s", e)
             raise ProviderError("Circuit breaker open: too many consecutive failures") from e
 
