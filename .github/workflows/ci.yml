@@ -64,8 +64,23 @@ jobs:
           name: coverage-report
           path: .coverage
 
+  bug-detection:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install ripgrep
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
+      - name: Run automated bug detection
+        run: python3 scripts/auto_bug_detection.py
+
   quality-gate:
-    needs: [lint, type-check, security, test]
+    needs: [lint, type-check, security, test, bug-detection]
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -74,7 +89,8 @@ jobs:
           if [ "${{ needs.lint.result }}" != "success" ] || \
              [ "${{ needs.type-check.result }}" != "success" ] || \
              [ "${{ needs.security.result }}" != "success" ] || \
-             [ "${{ needs.test.result }}" != "success" ]; then
+             [ "${{ needs.test.result }}" != "success" ] || \
+             [ "${{ needs.bug-detection.result }}" != "success" ]; then
             echo "One or more jobs failed"
             exit 1
           fi
